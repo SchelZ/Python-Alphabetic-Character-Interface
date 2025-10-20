@@ -7,8 +7,6 @@ import matplotlib.colors as mcolors
 
 
 class InteractiveChart:
-    """Chart with smooth height animation and hover tooltip."""
-
     def __init__(self, parent):
         self.parent = parent
         self.figure = Figure(figsize=(8, 3), dpi=100)
@@ -247,3 +245,4 @@ class LetterCounterApp(tk.Tk):
 if __name__ == "__main__":
     app = LetterCounterApp(debug=True)
     app.mainloop()
+
