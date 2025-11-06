@@ -154,8 +154,13 @@ class LetterCounterApp(tk.Tk):
         self.missing_letters_label = tk.Label(top_bar, text="", fg="red", font=("Segoe UI", 10))
         self.missing_letters_label.pack(side="right", padx=15)
         
-        self.results_text = tk.Text(self.frame_results, wrap="word", height=10)
-        self.results_text.pack(fill="x", padx=10, pady=5)
+        text_row = tk.Frame(self.frame_results)
+        text_row.pack(fill="x", padx=10, pady=5)
+        self.results_text = tk.Text(text_row, wrap="word", height=10, width=60)
+        self.results_text.pack(side="left", fill="both", expand=True, padx=(0,5))
+
+        self.shanon_text = tk.Text(text_row, wrap="word", height=10, width=60)
+        self.shanon_text.pack(side="left", fill="both", expand=True, padx=(5,0))
 
         self.chart_frame = tk.Frame(self.frame_results)
         self.chart_frame.pack(fill="both", expand=True, padx=10, pady=10)
@@ -244,5 +249,6 @@ class LetterCounterApp(tk.Tk):
 if __name__ == "__main__":
     app = LetterCounterApp(debug=True)
     app.mainloop()
+
 
 
