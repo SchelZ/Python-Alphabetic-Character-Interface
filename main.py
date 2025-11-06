@@ -7,6 +7,8 @@ import matplotlib.colors as mcolors
 
 
 class InteractiveChart:
+    """Chart with smooth height animation and hover tooltip."""
+
     def __init__(self, parent):
         self.parent = parent
         self.figure = Figure(figsize=(8, 3), dpi=100)
@@ -69,8 +71,6 @@ class InteractiveChart:
                 self.data = sorted_counts
                 if on_complete:
                     on_complete()
-
-
         step(0)
 
     def on_hover(self, event):
@@ -110,7 +110,7 @@ class LetterCounterApp(tk.Tk):
         self.debug = debug
         self.title("BSI Lp 1")
         self.dir_path = os.path.dirname(os.path.realpath(__file__))
-
+        
         self.sort_mode = tk.IntVar(value=0)
         self.counts = {}
         self.sorted_counts = []
@@ -222,6 +222,7 @@ class LetterCounterApp(tk.Tk):
         tk.Radiobutton(sort_frame, text="Crescator ↑", variable=self.sort_mode, value=1, command=self.update_sort).pack(side=LEFT)
         tk.Radiobutton(sort_frame, text="Litera A–Z", variable=self.sort_mode, value=2, command=self.update_sort).pack(side=LEFT)
         tk.Radiobutton(sort_frame, text="Litera Z–A", variable=self.sort_mode, value=3, command=self.update_sort).pack(side=LEFT)
+        tk.Button(sort_frame, text="Compresie", command=lambda: BuildCompression(self.counts, self.sorted_counts).build_shannon_fano(), width=10, height=1).pack(side=RIGHT, padx=15)
 
     def update_sort(self):
         match self.sort_mode.get():
@@ -234,15 +235,14 @@ class LetterCounterApp(tk.Tk):
             case 3:
                 self.sorted_counts = sorted(self.counts.items(), key=lambda x: x[0], reverse=True)
             case _: pass
-
         self.show_results()
 
     def go_back(self):
         self.show_select()
 
 
-
 if __name__ == "__main__":
     app = LetterCounterApp(debug=True)
     app.mainloop()
+
 
