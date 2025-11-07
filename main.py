@@ -1,10 +1,66 @@
-import tkinter as tk, os
-from tkinter import filedialog, LEFT
+import tkinter as tk, matplotlib.colors as mcolors, os, threading
+from tkinter import filedialog, LEFT, RIGHT
 from collections import Counter
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.colors as mcolors
 
+
+class Node:
+    def __init__(self, symbol=None, freq=0, left=None, right=None):
+        self.symbol = symbol
+        self.freq = freq
+        self.left = left
+        self.right = right
+
+class BuildCompression:
+    """dict with every letter and its apparition"""
+    def __init__(self, letters: dict[str, int], symbols, text_box):
+        self.counts = letters
+        self.symbols = symbols
+        self.node = None
+        self.results_txt = self.build_shannon_fano()
+        self.shanon_text = text_box
+
+    def build_shannon_fano(self):
+        """Creează codurile Shannon–Fano pe baza frecvenței."""
+        total = sum(c for _, c in self.symbols)              ## totalul cuvintelor
+        probs = [(l, c / total) for l, c in self.symbols]        ## (litera, numar apar caracter / total) = for l, c in lista de dict
+
+        codes = {}
+        self._recursive_build(probs, codes)
+        print("Coduri Shannon–Fano:")
+        for c, code in codes.items():
+            print(f"{c}: {code}")
+
+        return codes
+    
+    def show_results(self):
+        self.shanon_text.delete("1.0", tk.END)
+        for c, code in self.results_txt.items():
+            self.shanon_text.insert(tk.END, f"{c}: {code}\n")
+    
+    def _recursive_build(self, symbols, codes, prefix="") -> Node:      ## builds the tree and codes
+        """Recursiv — împarte lista și atribuie coduri binare."""
+        if len(symbols) == 1:
+            letter = symbols[0][0]
+            codes[letter] = int(prefix or "0")          ## conv to int instead of str
+            return
+
+        total = sum(p for _, p in symbols)
+        acc, split_index = 0, 0
+        for i, (_, p) in enumerate(symbols):
+            acc += p
+            if acc >= total / 2:
+                split_index = i + 1
+                break
+
+        left = symbols[:split_index]
+        right = symbols[split_index:]
+
+        self._recursive_build(left, codes, prefix + "0")
+        self._recursive_build(right, codes, prefix + "1")
+
+        self.node = Node(None, total, left, right) 
 
 class InteractiveChart:
     """Chart with smooth height animation and hover tooltip."""
@@ -227,7 +283,9 @@ class LetterCounterApp(tk.Tk):
         tk.Radiobutton(sort_frame, text="Crescator ↑", variable=self.sort_mode, value=1, command=self.update_sort).pack(side=LEFT)
         tk.Radiobutton(sort_frame, text="Litera A–Z", variable=self.sort_mode, value=2, command=self.update_sort).pack(side=LEFT)
         tk.Radiobutton(sort_frame, text="Litera Z–A", variable=self.sort_mode, value=3, command=self.update_sort).pack(side=LEFT)
-        tk.Button(sort_frame, text="Compresie", command=lambda: BuildCompression(self.counts, self.sorted_counts).build_shannon_fano(), width=10, height=1).pack(side=RIGHT, padx=15)
+
+        tk.Button(sort_frame, text="Compresie", command=lambda: BuildCompression(self.counts, self.sorted_counts, self.shanon_text).show_results(), width=10, height=1).pack(side=RIGHT, padx=15)
+
 
     def update_sort(self):
         match self.sort_mode.get():
@@ -240,6 +298,7 @@ class LetterCounterApp(tk.Tk):
             case 3:
                 self.sorted_counts = sorted(self.counts.items(), key=lambda x: x[0], reverse=True)
             case _: pass
+
         self.show_results()
 
     def go_back(self):
@@ -249,6 +308,3 @@ class LetterCounterApp(tk.Tk):
 if __name__ == "__main__":
     app = LetterCounterApp(debug=True)
     app.mainloop()
-
-
-
